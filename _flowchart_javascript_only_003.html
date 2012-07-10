@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SPK test</title>
+  <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+  <script>
+    // Function to create SVG elements:
+	function makeSVG(tag, attrs) {
+	  var el= document.createElementNS('http://www.w3.org/2000/svg', tag);
+	  for (var k in attrs)
+		el.setAttribute(k, attrs[k]);
+	  return el;
+	};
+
+    // Function to validate nodes:
+	function validateNode(nodename) {
+	  if ( nodename.search(/^(d|p|io)_[a-z0-9_]*$/) == -1 ) {
+	    throw new Error("Invalid node name!");
+	  } else if ( $('#' + nodename + '.flowdown-node').length == 0 ) {
+	    throw new Error("Specified node not found in document!");
+	  } else {
+	    return true;
+	  }
+	};
+
+	
+	// jQuery will run this when document loaded:
+    $(document).ready(function(){
+
+      // Generate start and finish nodes
+      $('body').append('<div class="flowdown-node" id="start" >START</div>');
+      $('body').append('<div class="flowdown-node" id="finish">FINISH</div>');
+
+	  // Define edges
+/*	  var edges = new Array(
+	    'p_1'
+	    //'p_1, io_1'
+	  );*/
+	  var edges = new Array(
+	    'p_1,  d_1',
+	    'io_1, d_2',
+	    'd_1,  io_1, y',
+	    'd_1,  d_2,  n',
+	    'd_2,  io_2, y'
+	  );
+	  
+	  // Parse edges and generate chains
+	  var chains   = new Array();
+	  console.log('Start parsing edges!');
+	  for (edges_subindex in edges) {
+		console.log('Chains:         ' + JSON.stringify(chains));
+		console.log('edges_subindex: ' + edges_subindex);
+		// Strip whitespace from sublist string and then split into array
+	    edge = edges[edges_subindex].replace(/\s+/g,'').split(',');
+		console.log('edge:           ' + JSON.stringify(edge));
+		// Normalise variables that may be used later
+		edge_start_node = false;
+		edge_end_node   = false;
+
+		// Start processing the first element of the current edge. Assume it's a node...
+		edge_start_node = edge[0];
+		// ... but validate it to be sure.
+		validateNode(edge_start_node);
+		// If there's a second element, validate that too
+		if (edge.length > 1) {
+		  edge_end_node = edge[1];
+		  validateNode(edge_end_node);
+		} else {		
+		  // OK, we're dealing with a singleton edge.
+		  console.log("Singleton!");
+		  // Since we're dealing w/a singleton edge, ensure that only one edge is defined!
+		  if (edges.length > 1) { throw new Error('Singleton edges must be sole edges!'); }
+		  // OK, now we know we're dealing with a valid, sole, singleton edge. We can
+		  // therefore complete our chain.
+		  else {
+			console.log("Time to make our sole chain and then break the loop!");
+			chains.push(new Array(edge_start_node));
+			break;
+		  }
+		}
+		
+		// Now we know we're dealing with a non-singleton edge, but it might be a sole edge.
+		// If there are no chains yet, no need to parse them; just start one, adding both
+		// the edge's nodes in order.
+		console.log('Non-singleton!');
+		if (chains.length == 0) {
+		  console.log('No chains yet! Time to make one!');
+		  chains.push(new Array(edge_start_node, edge_end_node));
+		  console.log('Chains:         ' + JSON.stringify(chains) + '\n\n***');
+		}
+
+		// Now we also know there's already a chain, which means either we're dealing with
+		// multiple edges or else something has gone awry. Let's just check to be sure
+		// nothing *has* gone awry! (Remember the singleton edges must be sole edges,
+		// so we'll check for that criterion being breached, too.)
+		else if (edge.length == 1 || edges.length == 1) {
+		  throw new Error('Unexpected pre-existing chain found!');
+		}
+		else {
+
+		  // Now we know that:
+		  // - we are dealing with multiple edges;
+		  // - we already have at least one chain in existence with some nodes on it;
+		  // - we *may* need to create additional chains.
+		  console.log('Non-sole!');
+
+		  // Make empty arrays in which to store existing positions in chains,
+		  // that have been assigned to the current edge's nodes.
+		  var edge_start_node_existing_posns = new Array();
+		  var edge_end_node_existing_posns   = new Array();
+		  // Deal with the current edge's start node
+		  for (chains_subindex in chains) {
+			chain = chains[chains_subindex];
+			for (chain_subindex in chain) {
+			  link = chain[chain_subindex];
+			  //console.log('link: ' + link);
+			  if (link == edge_start_node) {
+				// Have found a position where the current edge's start node is already in a chain,
+				// so add it to the relevant position array
+				var position = new Array (chains_subindex, chain_subindex);
+				edge_start_node_existing_posns.push(position);
+				console.log(edge_start_node + ' is already in chains at: ' + position);
+			  }
+			  else if (link == edge_end_node) {
+				// Have found a position where the current edge's end node is already in a chain,
+				// so add it to the relevant position array
+				var position = new Array (chains_subindex, chain_subindex);
+				edge_end_node_existing_posns.push(position);
+				console.log(edge_end_node + ' is already in chains at: ' + position);
+			  }
+			}
+		  }
+
+		  // Now we have arrays containing all the existing chain positions of the
+		  // current edge's start and end nodes.
+		  console.log('edge_start_node_existing_posns : '
+		    + edge_start_node_existing_posns + '\n'
+		    + 'edge_end_node_existing_posns   : '
+		    + edge_end_node_existing_posns);
+
+		  // If there are no existing chain positions for either of the current edge's
+		  // nodes, begin a new chain with it.
+		  if (edge_start_node_existing_posns.length == 0
+			&&
+			edge_start_node_existing_posns.length == 0) { 
+			chains.push(new Array(edge_start_node, edge_end_node)); }
+			console.log('Chains:         ' + JSON.stringify(chains) + '\n\n***');
+
+		  // Else if there's only one existing chain position for the current node,
+		  // then check if it's the last node in that chain, and whether the current
+		  // edge contains a second element.
+/*			  else if (node_positions.length == 1 
+			&&
+			node_positions[0][1] == chains[node_positions[0][0]].length - 1
+			&&
+			edge.length > 1
+			) {
+			// If so, append the end node in the current edge to the same chain (if
+			// that node is valid).
+			edge_end_node = edge[1];
+			validateNode(edge_end_node);
+			chains[node_positions[0][0]].push(edge_end_node);
+		  } */
+		  // chain.push(nodename);
+		}
+	  }
+	  console.log('\n\nFinal chains: ' + JSON.stringify(chains));
+	  
+    });
+  </script>
+  <style type="text/css">
+    .flowdown-node {
+      position:absolute;
+      text-align: center;
+      font-family:arial,helvetica,sans-serif;
+      max-width:300px;
+      padding:5px;
+      margin:0;
+      border:none;
+      top:0px; left:0px; // TODO: delete this line once layout code is working
+    }
+    .flowdown-node[id^=d_] {
+      max-width:100px;
+    }
+    pre {
+      text-align:left;
+      max-width:300px;
+      overflow:scroll;
+      border:1px solid #bbb;
+      background-color:#ddd;
+    }
+  </style>
+</head>
+<body style="margin:0; padding:0;">
+  <svg id="flowdown-bg" xmlns="http://www.w3.org/2000/svg" version="1.1" height="800px">
+	<defs><marker id="myMarker" viewBox="0 0 10 10" refX="5" refY="5" 
+	markerUnits="px" orient="auto"
+	markerWidth="4" markerHeight="3">
+	<polyline points="0,0 10,5 0,10" fill="black" />
+	</marker></defs>
+  </svg>
+
+  <div class="flowdown-node" id="p_1">
+    <p>foo bar</p>
+	<pre><code>some
+code with a very long line far too long for a small box
+	</code></pre>
+	<p>grue</p></div>
+  <div class="flowdown-node"  id="io_1" >
+    Distribute application using application-level package manager for language X.</div>
+  <div class="flowdown-node" id="d_1">
+    Is application intended to be executed on or by other code written in language X (e.g.
+     in the course of developing other applications)?</div>
+  <div class="flowdown-node"  id="d_2">
+    Is application intended to be useful in other situations?</div>
+  <div class="flowdown-node" id="io_2">
+  Distribute application using standalone installer(s), or systems-level package manager(s), for target operating system(s).</div>
+
+</body>
+</html>
