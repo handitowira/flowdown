@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SPK test</title>
+  <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+  <script>
+    // Function to create SVG elements:
+	function makeSVG(tag, attrs) {
+	  var el= document.createElementNS('http://www.w3.org/2000/svg', tag);
+	  for (var k in attrs)
+		el.setAttribute(k, attrs[k]);
+	  return el;
+	};
+
+    // Function to validate nodes:
+	function validateNode(nodename) {
+	  if ( nodename.search(/^(d|p|io)_[a-z0-9_]*$/) == -1 ) {
+	    throw new Error("Invalid node name!");
+	  } else if ( $('#' + nodename + '.flowdown-node').length == 0 ) {
+	    throw new Error("Specified node not found in document!");
+	  }
+	};
+
+	
+	// jQuery will run this when document loaded:
+    $(document).ready(function(){
+      // Generate start and finish nodes
+      $('body').append('<div class="flowdown-node" id="start" >START</div>');
+      $('body').append('<div class="flowdown-node" id="finish">FINISH</div>');
+	  // Position nodes
+	  var chain   = new Array();
+	  var digraph = new Array(
+//	    'p_1'
+	    'p_1, io_1'
+	  );
+/*	  var digraph = new Array(
+	    'p_1,  d_1',
+	    'd_1,  io_1, y',
+	    'd_1,  d_2,  n',
+	    'd_2,  io_1, y',
+	    'd_2,  d_2,  n',
+	    'io_1, d_2'
+	  ); */
+	  if (digraph.length == 0) {
+		throw new Error("Digraph is empty!");
+      }	else if (digraph.length == 1) {
+	    edge = digraph[0].replace(/\s+/g,'').split(',');
+        for (i in edge) {
+          // Ignore all but the first node (and second node, if present)
+		  if (i == 2) { break; }
+		  else {
+		    nodename = edge[i];
+		    validateNode(nodename);
+		    chain.push(nodename);
+		  }
+        }
+        chain.push("finish");
+        chain.splice(0,0,"start");
+        for (n in chain) {
+          nodename = chain[n];
+          if ( n > 0 ) {
+            $('#'+nodename).css({'top':(t+h+50)+'px'});
+            var line_y1 = t+h;
+          }
+		  var w = $('#'+nodename).outerWidth();
+		  var h = $('#'+nodename).outerHeight();
+          $('#'+nodename).css({'left':(200-w*0.5)+'px'});
+		  var l = $('#'+nodename).position().left;
+		  var t = $('#'+nodename).position().top;
+		  // alert('nodename: ' + nodename + '. w: ' + w + '. h: ' + h + '. l: ' + l + '. t: ' + t);
+		  // Use CSS3 selectors to check element IDs...
+		  if ( $('#'+nodename).is('[id^=p_]') || $('#'+nodename).is('#start') || $('#'+nodename).is('#finish')) {
+			var shape = makeSVG('rect', {x: l, y: t, width:w, height:h, rx:10, ry:10, stroke:'black', 'stroke-width':2, fill:'#eee'});
+		  } else if ($('#'+nodename).is('[id^=d_]'))  {
+			var shape = makeSVG('rect', {x: l-(Math.max(w,h)-w)*0.5, y: t-(Math.max(w,h)-h)*0.5, width:Math.max(w,h), height:Math.max(w,h), stroke:'black', 'stroke-width':2, fill:'#eee', transform:'rotate(45,cx,cy)'.replace('cx',l+w*0.5).replace('cy',t+h*0.5)});
+		  } else if ($('#'+nodename).is('[id^=io_]'))  {
+			var shape = makeSVG('polygon',
+			{points: 'x1,y1,x2,y2,x3,y3,x4,y4'
+			  .replace('x1',l)        .replace('y1',t)
+			  .replace('x2',l+w+h*0.2).replace('y2',t)
+			  .replace('x3',l+w)      .replace('y3',t+h)
+			  .replace('x4',l-h*0.2)  .replace('y4',t+h),
+			stroke:'black', 'stroke-width':2, fill:'#eee'});
+		  };		
+		  document.getElementById('flowdown-bg').appendChild(shape);
+          if ( n > 0 ) {
+			var line = makeSVG('line', {x1:200, y1:line_y1, x2:200, y2:t-3, stroke:'black', 'stroke-width':2, 'marker-end':'url(#myMarker)'});
+			document.getElementById('flowdown-bg').appendChild(line);
+          }
+		  $('#flowdown-bg').css({'height':(t+h+50)+'px'});
+        }
+      }
+      
+      
+      
+      
+      /*
+	  for (x in digraph) {
+	    edge = digraph[x].replace(/\s+/g,'').split(',');
+//	    alert(x + ': ' + edge);
+        // Handle likely errors
+        if (edge.length != 2 && edge.length != 3) {
+	      throw new Error("Edge must have either two or three attributes!");
+	    } else if (edge.length == 3) {
+	      if (edge[2] != 'y' && edge[2] != 'n') {
+	        throw new Error("Edge has unrecognised label!");
+          } else if (edge[0].match(/^d_/) != 'd_') {
+			  throw new Error("Edge coming out of a node other than a decision node should not have a label!");
+		  }
+		} else {
+		// Add edge to a chain
+		}
+	  }
+	  */
+      // For each Flowdown node, get its type, location & dimensions, then draw a corresponding SVG shape beneath it
+/*
+      $('.flowdown-node').each(function() {
+        var w = $(this).outerWidth();
+        var h = $(this).outerHeight();
+        var l = $(this).position().left;
+        var t = $(this).position().top;
+        // Use CSS3 selectors to check element IDs...
+		if ( $(this).is('[id^=p_]') || $(this).is('#start') || $(this).is('#finish')) {
+		  var shape = makeSVG('rect', {x: l, y: t, width:w, height:h, rx:10, ry:10, stroke:'black', 'stroke-width':2, fill:'#eee'});
+        } else if ($(this).is('[id^=d_]'))  {
+		  var shape = makeSVG('rect', {x: l-(Math.max(w,h)-w)*0.5, y: t-(Math.max(w,h)-h)*0.5, width:Math.max(w,h), height:Math.max(w,h), stroke:'black', 'stroke-width':2, fill:'#eee', transform:'rotate(45,cx,cy)'.replace('cx',l+w*0.5).replace('cy',t+h*0.5)});
+        } else if ($(this).is('[id^=io_]'))  {
+		  var shape = makeSVG('polygon',
+		  {points: 'x1,y1,x2,y2,x3,y3,x4,y4'
+		    .replace('x1',l)        .replace('y1',t)
+		    .replace('x2',l+w+h*0.2).replace('y2',t)
+		    .replace('x3',l+w)      .replace('y3',t+h)
+		    .replace('x4',l-h*0.2)  .replace('y4',t+h),
+		  stroke:'black', 'stroke-width':2, fill:'#eee'});
+        };		
+		document.getElementById('flowdown-bg').appendChild(shape);
+      });
+      */
+		// Draw connectors
+    });
+  </script>
+  <style type="text/css">
+    .flowdown-node {
+      position:absolute;
+      text-align: center;
+      font-family:arial,helvetica,sans-serif;
+      max-width:300px;
+      padding:5px;
+      margin:0;
+      border:none;
+      top:0px; left:0px; // TODO: delete this line once layout code is working
+    }
+    .flowdown-node[id^=d_] {
+      max-width:100px;
+    }
+    pre {
+      text-align:left;
+      max-width:300px;
+      overflow:scroll;
+      border:1px solid #bbb;
+      background-color:#ddd;
+    }
+  </style>
+</head>
+<body style="margin:0; padding:0;">
+  <svg id="flowdown-bg" xmlns="http://www.w3.org/2000/svg" version="1.1" height="800px">
+	<defs><marker id="myMarker" viewBox="0 0 10 10" refX="5" refY="5" 
+	markerUnits="px" orient="auto"
+	markerWidth="4" markerHeight="3">
+	<polyline points="0,0 10,5 0,10" fill="black" />
+	</marker></defs>
+  </svg>
+
+  <div class="flowdown-node" id="p_1">
+    <p>foo bar</p>
+	<pre><code>some
+code with a very long line far too long for a small box
+	</code></pre>
+	<p>grue</p></div>
+  <div class="flowdown-node"  id="io_1" >
+    Distribute application using application-level package manager for language X.</div>
+<!--
+  <div class="flowdown-node" id="d_1">
+    Is application intended to be executed on or by other code written in language X (e.g.
+     in the course of developing other applications)?</div>
+  <div class="flowdown-node"  id="d_2">
+    Is application intended to be useful in other situations?</div>
+  <div class="flowdown-node" id="io_2">
+  Distribute application using standalone installer(s), or systems-level package manager(s), for target operating system(s).</div>
+-->
+
+</body>
+</html>
