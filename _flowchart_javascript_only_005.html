@@ -18,7 +18,7 @@
 		$( '#editpane' ).resizable({ minWidth: 550, handles: 'e', alsoResize: '#add-remove-editors' });
 		$( "button").button();
 		$( "#node-editors" ).sortable();
-		$( "#node-editors" ).disableSelection();
+		//$( "#node-editors" ).disableSelection();
 		// Markdown editor addition and removal
 		var converter1 = Markdown.getSanitizingConverter();
 		var editor1 = new Markdown.Editor(converter1, '-1');

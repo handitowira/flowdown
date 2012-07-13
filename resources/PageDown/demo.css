@@ -6,6 +6,16 @@ body
     margin:0px;
 }
 
+div#flowchart
+{
+	position:fixed;
+	right:0px;
+	width:50%;
+	overflow-y:scroll;
+	margin:0;
+	border:none;
+}
+
 div#editpane
 {
 	position:absolute;
@@ -73,6 +83,10 @@ li.wmd-panel
 	border: 1px solid DarkGray;
 	margin:0px;
 	margin-left:10px;
+	resize: vertical;
+	overflow:auto;
+/*	white-space: nowrap; */
+	font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New, monospace;
 }
 
 .wmd-preview 
