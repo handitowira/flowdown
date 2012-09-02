@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PageDown Demo Page</title>
+
+  <link rel="stylesheet" type="text/css" href="resources/PageDown/demo.css" />
+  <script type="text/javascript" src="resources/PageDown/Markdown.Converter.js"></script>
+  <script type="text/javascript" src="resources/PageDown/Markdown.Sanitizer.js"></script>
+  <script type="text/javascript" src="resources/PageDown/Markdown.Editor.js"></script>
+  <link rel="stylesheet" type="text/css" href="resources/jquery-ui-1.8.23.custom/css/base/jquery-ui.css" />
+  <link rel="stylesheet" type="text/css" href="resources/jquery-ui-1.8.23.custom/css/base/jquery.ui.resizable.css" />
+  <script src="resources/jquery-ui-1.8.23.custom/js/jquery-1.7.2.min.js"></script>
+  <script src="resources/jquery-ui-1.8.23.custom/js/jquery-ui-1.8.23.custom.min.js"></script>
+  <script>
+    $(document).ready(function(){
+      // UI & styling
+      $( '#editpane' ).resizable({
+        minWidth: 550, handles: 'e', alsoResize: '#add-remove-editors'
+      });
+      $( "button" ).button();
+      $( "#node-editors" ).sortable();
+      //$( "#node-editors" ).disableSelection();
+      // Markdown editor addition and removal
+      var converter1 = Markdown.getSanitizingConverter();
+      var editor1 = new Markdown.Editor(converter1, '-1');
+      editor1.run();
+      $("#add-editor").click(function () {
+        var n = $("textarea.wmd-input").length + 1;
+        $('#add-remove-editors').before('\
+          <li class="wmd-panel">\
+            <div id="wmd-button-bar-' + n + '" class="wmd-button-bar"></div>\
+            <textarea id="wmd-input-' + n + '" class="wmd-input"></textarea>\
+            <input\
+              type="radio"\
+              name="node-type-' + n + '"\
+              value="process"\
+              id="node-type-' + n + '-process"\
+              style="position:absolute; left:400px; top:40px;"><label for="node-type-1-process"  style="position:absolute; left:420px; top:42px;" >Process</label>\
+            <input\
+              type="radio"\
+              name="node-type-' + n + '"\
+              value="io"\
+              id="node-type-' + n + '-io"\
+              style="position:absolute; left:400px; top:70px;"><label for="node-type-1-io"       style="position:absolute; left:420px; top:72px;" >I/O</label>\
+            <input\
+              type="radio"\
+              name="node-type-' + n + '"\
+              value="decision"\
+              id="node-type-' + n + '-decision"\
+              style="position:absolute; left:400px; top:100px;"><label for="node-type-1-decision" style="position:absolute; left:420px; top:102px;">Decision</label>\
+          </li>'
+        );
+        $('#flowchart').append('\
+          <div id="wmd-preview-' + n + '" class="wmd-panel wmd-preview"></div>'
+        );
+        new Markdown.Editor(converter1, '-' + n).run();
+        $('li.wmd-panel').css({'cursor':'ns-resize', 'border-top':'1px solid silver'});
+      });
+    });
+  </script>
+
+</head>
+
+<body>
+
+<!-- previews -->
+<div id="flowchart">
+  <div id="wmd-preview-1" class="wmd-panel wmd-preview"></div>
+  <div id="wmd-preview-2" class="wmd-panel wmd-preview"></div>
+</div>
+
+<div id="editpane">
+<ul id="node-editors">
+<!-- first editor -->
+  <li class="wmd-panel">
+    <div id="wmd-button-bar-1" class="wmd-button-bar"></div>
+    <textarea id="wmd-input-1" class="wmd-input"></textarea>
+    <input type="radio" name="node-type-1" value="process"  id="node-type-1-process"  style="position:absolute; left:400px; top:40px;" ><label for="node-type-1-process"  style="position:absolute; left:420px; top:42px;" >Process</label>
+    <input type="radio" name="node-type-1" value="io"       id="node-type-1-io"       style="position:absolute; left:400px; top:70px;" ><label for="node-type-1-io"       style="position:absolute; left:420px; top:72px;" >I/O</label>
+    <input type="radio" name="node-type-1" value="decision" id="node-type-1-decision" style="position:absolute; left:400px; top:100px;"><label for="node-type-1-decision" style="position:absolute; left:420px; top:102px;">Decision</label>
+  </li>
+
+<!-- additional editors added by JavaScript will go below -->
+
+<div id="add-remove-editors"><button id="remove-editor">-</button>&nbsp;<button id="add-editor">+</button></div>
+</ul>
+</div>
+
+<div id="editpane-handle">&#x25C4;</div>
+
+</body>
+</html>
