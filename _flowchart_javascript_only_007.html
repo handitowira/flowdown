@@ -14,8 +14,8 @@
   <script>
     $(document).ready(function(){
       // UI & styling
-      $( "button" ).button();
-      $("#editpane-handle").toggle(function() {
+      $('button').button();
+      $('#editpane-handle').toggle(function() {
         $('#editpane').animate({
           left: '-=545',
         }, 500, function() {
@@ -38,15 +38,15 @@
           $('#editpane-handle').html('&#x25C4;');
         });
       });
-      $( "#node-editors" ).sortable();
+      $('#node-editors').sortable();
       //$( "#node-editors" ).disableSelection();
       // Markdown editor addition and removal
       var converter1 = Markdown.getSanitizingConverter();
       var editor1 = new Markdown.Editor(converter1, '-1');
       editor1.run();
-      $("#add-editor").click(function () {
+      $('#add-editor').click(function () {
         var n = $("textarea.wmd-input").length + 1;
-        $('#add-remove-editors').before('\
+        $('#node-editors').append('\
           <li class="wmd-panel">\
             <div id="wmd-button-bar-' + n + '" class="wmd-button-bar"></div>\
             <textarea id="wmd-input-' + n + '" class="wmd-input"></textarea>\
@@ -86,24 +86,23 @@
 <!-- previews -->
 <div id="flowchart">
   <div id="wmd-preview-1" class="wmd-panel wmd-preview"></div>
-  <div id="wmd-preview-2" class="wmd-panel wmd-preview"></div>
 </div>
 
 <div id="editpane">
-<ul id="node-editors">
-<!-- first editor -->
-  <li class="wmd-panel">
-    <div id="wmd-button-bar-1" class="wmd-button-bar"></div>
-    <textarea id="wmd-input-1" class="wmd-input"></textarea>
-    <input type="radio" name="node-type-1" value="process"  id="node-type-1-process"  style="position:absolute; left:400px; top:40px;" ><label for="node-type-1-process"  style="position:absolute; left:420px; top:42px;" >Process</label>
-    <input type="radio" name="node-type-1" value="io"       id="node-type-1-io"       style="position:absolute; left:400px; top:70px;" ><label for="node-type-1-io"       style="position:absolute; left:420px; top:72px;" >I/O</label>
-    <input type="radio" name="node-type-1" value="decision" id="node-type-1-decision" style="position:absolute; left:400px; top:100px;"><label for="node-type-1-decision" style="position:absolute; left:420px; top:102px;">Decision</label>
-  </li>
+  <ul id="node-editors">
+  <!-- first editor -->
+    <li class="wmd-panel">
+      <div id="wmd-button-bar-1" class="wmd-button-bar"></div>
+      <textarea id="wmd-input-1" class="wmd-input"></textarea>
+      <input type="radio" name="node-type-1" value="process"  id="node-type-1-process"  style="position:absolute; left:400px; top:40px;" ><label for="node-type-1-process"  style="position:absolute; left:420px; top:42px;" >Process</label>
+      <input type="radio" name="node-type-1" value="io" id="node-type-1-io"       style="position:absolute; left:400px; top:70px;" ><label for="node-type-1-io"       style="position:absolute; left:420px; top:72px;" >I/O</label>
+      <input type="radio" name="node-type-1" value="decision" id="node-type-1-decision" style="position:absolute; left:400px; top:100px;"><label for="node-type-1-decision" style="position:absolute; left:420px; top:102px;">Decision</label>
+    </li>
 
-<!-- additional editors added by JavaScript will go below -->
+  <!-- additional editors added by JavaScript will go below -->
 
-<div id="add-remove-editors"><button id="remove-editor">-</button>&nbsp;<button id="add-editor">+</button></div>
-</ul>
+  </ul>
+  <div id="add-remove-editors"><button id="remove-editor">-</button>&nbsp;<button id="add-editor">+</button></div>
 </div>
 
 <div id="editpane-handle">&#x25C4;</div>

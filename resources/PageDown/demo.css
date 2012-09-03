@@ -68,11 +68,19 @@ div#add-remove-editors
 	width:550px;
 	background-color:#eee;
 	margin:0px;
+	margin-top:1em;
 	border:none;
 	text-align:center;
-	position:fixed;
+	position:absolute;
 	bottom:0px;
 	left:0px;
+}
+
+button#remove-editor, button#add-editor
+{
+	width:3em;
+	margin-top:5px;
+	margin-bottom:5px;
 }
 
 .wmd-panel
