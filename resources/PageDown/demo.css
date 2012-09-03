@@ -9,17 +9,17 @@ body
 
 div#flowchart
 {
-	position:fixed;
+	position:absolute;
 	right:0px;
 	width:50%;
-	overflow-y:scroll;
+/*	overflow-y:scroll; */
 	margin:0;
 	border:none;
 }
 
 div#editpane
 {
-	position:absolute;
+	position:fixed;
 	width:550px;
 	left:0px;
 	top:0px;
@@ -32,11 +32,11 @@ div#editpane
 
 div#editpane-handle
 {
-	position:absolute;
+	position:fixed;
 	width:25px;
 	height:30px;
 	left:550px;
-	top:45%;
+	top:0px;
 	margin:0px;
 	border:none;
 	border-top-right-radius: 10px;
